@@ -90,11 +90,12 @@ write_csv(motor_crash_df, file = file)
 url_data <- "https://raw.githubusercontent.com/chinedu2301/data608-project/main/data/motor_crash_df.csv"
 crash_df <- read.csv(url_data)
 crash_df <- as_tibble(crash_df) 
-crash_df$crash_date <- as.Date(crash_df$crash_date, format = "%m/%d/%Y")
 ```
 
-**View the head of the data**
+
+**Change the crash_date data type to date format and View the head of the data**
 ```{r}
+crash_df$crash_date <- as.Date(crash_df$crash_date, format = "%Y-%m-%d")
 crash_df %>% head(20)
 ```
 
