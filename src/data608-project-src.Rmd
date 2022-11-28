@@ -1,6 +1,6 @@
 ---
-title: "data608-project-src"
-author: "Chinedu Onyeka"
+title: "data608-project"
+author: "Chinedu Onyeka and Charles Ugiagbe"
 date: '2022-11-28'
 output: html_document
 ---
@@ -9,37 +9,85 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+**Load required libraries**
 ```{r load-lib, message=FALSE, warning=FALSE}
 library(tidyverse)
+library(lubridate)
 library(plotly)
 library(shiny)
 ```
 
-Read the data
-
+**Read the data**
 ```{r read-data,message=FALSE, warning=FALSE}
-url <- ""
+url <- "MotorVehicleCollisionsCrashes.csv"
 motorCrash <- read.csv(url)
 motorCrash <- as_tibble(motorCrash)
 ```
 
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+**Check the head of the data**
+```{r}
+head(motorCrash)
 ```
 
-## Including Plots
+#### Data Preprocessing  
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+**Select required columns and rename the columns**
+```{r}
+req_columns <- motorCrash %>% select("CRASH.DATE", "CRASH.TIME", "BOROUGH", "ZIP.CODE", "LATITUDE", "LONGITUDE",
+                                     "NUMBER.OF.PERSONS.INJURED", "NUMBER.OF.PERSONS.KILLED", "CONTRIBUTING.FACTOR.VEHICLE.1",
+                                     "VEHICLE.TYPE.CODE.1")
+headers <- c("crash_date", "crash_time", "borough", "zip_code", "latitude", "longitude", "number_injured", "number_killed",
+            "contributing_factor","vehicle_type")
+names(req_columns) <- headers
+head(req_columns)
+```
+**Remove records that have missing zip_code, latitude, longitude, vehicle_type, and contributing_factor**
+```{r}
+missing <- c(NA, NULL, "")
+remove_missing <- req_columns %>% filter(!zip_code %in% missing & !latitude %in% missing & !longitude %in% missing &
+                                           !vehicle_type %in% missing & !contributing_factor %in% missing)
+head(remove_missing, 20)
+```
+**Convert the crash_date column to date format**
+```{r}
+remove_missing$crash_date <- as.Date(remove_missing$crash_date, format = "%m/%d/%Y")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+**Filter the data for only records with year greater than 2015**
+```{r}
+motor_crash = remove_missing %>% filter(year(crash_date) > 2015)
+head(motor_crash)
+```
+
+**Drop the remaining NA**
+```{r}
+motor_crash_df <- motor_crash %>% drop_na()
+```
+
+**Check if there is any NA in the dataset**
+```{r}
+any(is.na(motor_crash_df))
+```
+**Take a glimpse of the data**
+```{r}
+glimpse(motor_crash_df)
+```
+
+**Look at the summary statistics of the data**
+```{r}
+summary(motor_crash_df)
+```
+
+
+```{r}
+file = "C:\\Users\\exper\\OneDrive\\Documents\\CUNY SPS\\Fall 2022\\DATA_608\\project\\data608-project\\data608-project\\data\\motor_crash_df.csv"
+write_csv(motor_crash_df, file = file)
+```
+
+
+
+
+
+
+
+
