@@ -28,8 +28,7 @@ motorCrash <- as_tibble(motorCrash)
 ```{r}
 head(motorCrash)
 ```
-
-#### Data Preprocessing  
+<center> <h3>  Data Pre-processing  </h3> </center>
 
 **Select required columns and rename the columns**
 ```{r}
@@ -82,6 +81,27 @@ summary(motor_crash_df)
 ```{r}
 file = "C:\\Users\\exper\\OneDrive\\Documents\\CUNY SPS\\Fall 2022\\DATA_608\\project\\data608-project\\data608-project\\data\\motor_crash_df.csv"
 write_csv(motor_crash_df, file = file)
+```
+
+<center> <h3>  Data Analysis  </h3> </center>
+
+**Read the data from github**
+```{r read-data,message=FALSE, warning=FALSE}
+url_data <- "https://raw.githubusercontent.com/chinedu2301/data608-project/main/data/motor_crash_df.csv"
+crash_df <- read.csv(url_data)
+crash_df <- as_tibble(crash_df) 
+crash_df$crash_date <- as.Date(crash_df$crash_date, format = "%m/%d/%Y")
+```
+
+**View the head of the data**
+```{r}
+crash_df %>% head(20)
+```
+
+
+****
+```{r}
+###
 ```
 
 
