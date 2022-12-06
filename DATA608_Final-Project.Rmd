@@ -1,0 +1,156 @@
+---
+title: "DATA608_Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(readr)
+library(gridExtra)
+library(scales)
+library(lubridate)
+library(ggrepel)
+library(rgdal)
+library(plotly)
+```
+
+
+
+```{r}
+url_data <- "https://raw.githubusercontent.com/chinedu2301/data608-project/main/data/motor_crash_df.csv"
+crash_df <- read.csv(url_data)
+crash_df <- as_tibble(crash_df) 
+```
+
+
+**Change the crash_date data type to date format and View the head of the data**
+```{r}
+crash_df$crash_date <- as.Date(crash_df$crash_date, format = "%Y-%m-%d")
+crash_df %>% head(8)
+```
+
+
+
+```{r}
+glimpse(crash_df)
+```
+
+###   Car crashes by year
+
+**Since 2018, there has been a decline in the car crash incident in NYC but there was a sharp decline from 2019 to 2020. The decline has also continue steadily after then.**
+
+```{r}
+crash_df$year <- year(crash_df$crash_date) #extract year from date using the lubridate year() function
+
+crash_df %>%
+        ggplot(aes(x=as.factor(year))) + geom_bar(stat='count', fill='purple') +
+        scale_y_continuous(labels=comma) + labs(x='Year', y='No of Incident', title='Incidents by year') + 
+        geom_label(stat = "count", aes(label = ..count.., y = ..count..))
+```
+
+### Car crash by quarter
+
+```{r}
+library(viridis)
+crash_df$quarter <- quarter(crash_df$crash_date) #extract Quarters from date
+
+q1 <- crash_df %>% filter(year!=2013) %>% select(year, quarter) %>% group_by(year) %>% count(quarter) %>%
+        ggplot(aes(x=as.factor(quarter), y=n, fill = quarter)) + geom_bar(stat='identity') + 
+        scale_y_continuous(labels=comma) + facet_grid(.~year) + labs(x='Quarter', y='Number of incidents', title='Incidents by Quarter') 
+q1 + scale_fill_viridis()
+```
+
+
+###   Car crashes by weekdays
+
+**As expected, Friday has the most crash incident because it is ussually the most busy day in terms of vehicular movement. People travelling for weekend.**
+```{r}
+crash_df$weekday <- wday(crash_df$crash_date, label=TRUE)
+
+crash_df %>% count(weekday) %>%
+      ggplot(aes(x=weekday, y=n)) + geom_bar(stat='identity', fill=rainbow(n=7)) +
+        scale_y_continuous(labels=comma) +
+        labs(x='Weekday', y='Number of incidents', title='Incidents by Weekday')
+```
+
+### crash incident by daytime
+ 
+```{r}
+time <- as.POSIXct(strptime(c(crash_df$crash_time), "%H:%M"), "UTC")
+x=as.POSIXct(strptime(c("0000","0500","1100","1600","1900","2359"),
+                      "%H%M"),"UTC")
+labs=c("night","morning","afternoon","evening","night")
+day_time <- labs[findInterval(time1,x)]
+
+crash_df$day_time <- c(day_time)
+print(crash_df)
+```
+
+
+crash_df$time <- time(crash_df$crash_time, label=TRUE)
+
+```{r}
+
+crash_df$day_time  %>% count(day_time) %>%
+      ggplot(aes(x=month, y=n)) + geom_bar(stat='identity', fill='purple') +
+        scale_y_continuous(labels=comma) +
+        labs(x='new_time', y='Number of incidents', title='Incidents by time')
+```
+
+
+
+
+###   Crash Incident by Borough.
+
+**Brooklyn has the highest number of crashes and staten island has the least number of crash incident.**
+  
+```{r}
+plotly::ggplotly(crash_df %>% count(borough) %>%
+        ggplot(aes(x=reorder(borough, n), y=n, fill=n, text=borough)) +
+        geom_bar(stat='identity', fill='violet') +
+        labs(x='', y='Number of crashes'),
+         tooltip=c("text", "y"))
+```
+
+### Top Ten(10) incidents by number of victims
+
+```{r}
+crash_df$victims <- crash_df$number_killed + crash_df$number_injured
+Top10 <- crash_df %>% select(crash_date, borough, number_killed, number_injured, victims, zip_code) %>% 
+         arrange(desc(victims)) %>% top_n(n=10, wt=victims)
+Top10
+```
+
+
+### Victims per crash incident
+```{r}
+crash_df$victims <- crash_df$number_killed + crash_df$number_injured
+
+VictimsByborough <- crash_df %>% group_by(borough)  %>%   summarize(sumVic=sum(victims), sumInj=sum(number_injured), sumDeath=sum(number_killed), PercDeath=round(sumDeath/sumVic,3), sumIncidents=n(), vicPerInc=round(sumVic/sumIncidents,1)) %>% arrange(desc(sumVic))
+VictimsByborough
+```
+
+### Crash Incident by vehicle type.
+```{r}
+ggplotly(crash_df %>% count(vehicle_type) %>%
+        ggplot(aes(x=vehicle_type, y=n, fill=n, text=vehicle_type)) +
+        geom_bar(stat='identity', fill='red') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+        labs(x='', y='Number of crashes'),
+         tooltip=c("text", "y"))
+```
+
+
+```{r}
+ggplotly(crash_df %>% count(contributing_factor) %>%
+        ggplot(aes(x=contributing_factor, y=n, fill=n, text=contributing_factor)) +
+        geom_bar(stat='identity', fill='red') + theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+        labs(x='', y='Number of crashes'),
+         tooltip=c("text", "y"))
+```
+
+
