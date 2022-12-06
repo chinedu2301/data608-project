@@ -86,7 +86,7 @@ write_csv(motor_crash_df, file = file)
 <center> <h3>  Data Analysis  </h3> </center>
 
 **Read the data from github**
-```{r read-data,message=FALSE, warning=FALSE}
+```{r read-data-github,message=FALSE, warning=FALSE}
 url_data <- "https://raw.githubusercontent.com/chinedu2301/data608-project/main/data/motor_crash_df.csv"
 crash_df <- read.csv(url_data)
 crash_df <- as_tibble(crash_df) 
