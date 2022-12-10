@@ -1,5 +1,5 @@
 ---
-title: "data608-project"
+title: "data608-project data preparation"
 author: "Chinedu Onyeka and Charles Ugiagbe"
 date: '2022-11-28'
 output: html_document
@@ -99,11 +99,6 @@ crash_df$crash_date <- as.Date(crash_df$crash_date, format = "%Y-%m-%d")
 crash_df %>% head(20)
 ```
 
-
-****
-```{r}
-###
-```
 
 
 
